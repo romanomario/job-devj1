@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  nginx:
+    image: nginx:1.22
+    ports:
+      - 80:80
+    links:
+      - php
+    volumes:
+      - ./infra/conf/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - .:/srv/caprionlinesrl/work-assessment
+
+  php:
+    build: infra/docker/php-8.2
+    volumes:
+      - ./infra/conf/php-8.2/php/php.ini:/usr/local/etc/php/php.ini
+      - ./infra/conf/php-8.2/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./infra/conf/php-8.2/php-fpm.d:/usr/local/etc/php-fpm.d
+      - ~/.ssh:/home/dev/.ssh
+      - .:/srv/caprionlinesrl/work-assessment
+    environment:
+      - DATABASE_URL=mysql://root:dev@mariadb:3306/dev?charset=utf8mb4&serverVersion=mariadb-10.5.16
+
+  mariadb:
+    image: mariadb:10.5
+    restart: always
+    volumes:
+      - ./infra/volumes/mariadb_data:/var/lib/mysql
+    command: mysqld --sql_mode="NO_ENGINE_SUBSTITUTION"
+    environment:
+      - MYSQL_ROOT_PASSWORD=dev
+      - MYSQL_DATABASE=dev
+      - MYSQL_USER=dev
+      - MYSQL_PASSWORD=dev
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    links:
+      - mariadb
+    ports:
+      - 8000:80
+    environment:
+      - PMA_HOST=mariadb
+      - PMA_USER=dev
+      - PMA_PASSWORD=dev
