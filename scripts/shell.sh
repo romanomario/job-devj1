@@ -1,3 +1,3 @@
 #! /bin/bash
 
-docker compose exec --user dev --workdir /srv/caprionlinesrl/work-assessment php bash
+docker compose exec --user dev --workdir /srv/caprionlinesrl/job-devj1 php bash
